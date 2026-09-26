@@ -4,6 +4,7 @@ export const bugService = {
     query,
     getById,
     getDefaultFilter,
+    remove,
 }
 function query() {
     return fetch(BASE_URL)
@@ -17,4 +18,9 @@ function getById(bugId) {
 
 function getDefaultFilter() {
     return { txt: '', minSeverity: 0 }
+}
+
+function remove(bugId) {
+    return fetch(`${BASE_URL}/${bugId}/remove`)
+        .then(res => res.json())
 }
