@@ -5,6 +5,7 @@ export const bugService = {
     getById,
     getDefaultFilter,
     remove,
+    save,
 }
 function query() {
     return fetch(BASE_URL)
@@ -22,5 +23,12 @@ function getDefaultFilter() {
 
 function remove(bugId) {
     return fetch(`${BASE_URL}/${bugId}/remove`)
+        .then(res => res.json())
+}
+
+function save(bug) {
+    const url = `${BASE_URL}/save?title=${encodeURIComponent(bug.title)}&description=${encodeURIComponent(bug.description)}&severity=${bug.severity}`
+
+    return fetch(url)
         .then(res => res.json())
 }
