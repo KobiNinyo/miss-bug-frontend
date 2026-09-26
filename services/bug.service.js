@@ -27,7 +27,8 @@ function remove(bugId) {
 }
 
 function save(bug) {
-    const url = `${BASE_URL}/save?title=${encodeURIComponent(bug.title)}&description=${encodeURIComponent(bug.description)}&severity=${bug.severity}`
+    const url = `${BASE_URL}/save?_id=${bug._id || ''}&title=${encodeURIComponent(bug.title)}
+    &description=${encodeURIComponent(bug.description)}&severity=${bug.severity}`
 
     return fetch(url)
         .then(res => res.json())
