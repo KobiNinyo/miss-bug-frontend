@@ -13,8 +13,18 @@ function query() {
 }
 
 function getById(bugId) {
-    return fetch(`${BASE_URL}/${bugId}`)
-        .then(res => res.json())
+    return fetch(`${BASE_URL}/${bugId}`, {
+        credentials: 'include',
+    })
+        .then(res => {
+            if (!res.ok) {
+                return res.text().then(errMsg => {
+                    throw new Error(errMsg)
+                })
+            }
+
+            return res.json()
+        })
 }
 
 function getDefaultFilter() {
@@ -22,14 +32,14 @@ function getDefaultFilter() {
 }
 
 function remove(bugId) {
-    return fetch(`${BASE_URL}/${bugId}/remove`)
+    return fetch(`${BASE_URL}/${bugId}/remove`, {
+        credentials: 'include',
+    })
         .then(res => res.json())
 }
 
 function save(bug) {
-    const url = `${BASE_URL}/save?_id=${bug._id || ''}&title=${encodeURIComponent(bug.title)}
-    &description=${encodeURIComponent(bug.description)}&severity=${bug.severity}`
-
+  const url = `${BASE_URL}/save?_id=${bug._id || ''}&title=${encodeURIComponent(bug.title)}&description=${encodeURIComponent(bug.description)}&severity=${bug.severity}`
     return fetch(url)
         .then(res => res.json())
 }
