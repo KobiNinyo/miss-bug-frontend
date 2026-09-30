@@ -26,6 +26,11 @@ export function BugDetails() {
             Severity: <span>{bug.severity}</span>
           </p>
           <p>{bug.description}</p>
+          {bug.labels && bug.labels.length > 0 && (
+            <p>
+              Labels: <span>{bug.labels.join(', ')}</span>
+            </p>
+          )}
         </div>
       )}
       <button>

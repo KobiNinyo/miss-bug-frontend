@@ -6,77 +6,86 @@ import { BugFilter } from '../cmps/BugFilter.jsx'
 import { BugList } from '../cmps/BugList.jsx'
 
 export function BugIndex() {
-    const [bugs, setBugs] = useState(null)
-    const [filterBy, setFilterBy] = useState(bugService.getDefaultFilter())
+  const [bugs, setBugs] = useState(null)
+  const [filterBy, setFilterBy] = useState(bugService.getDefaultFilter())
 
-    useEffect(loadBugs, [filterBy])
+  useEffect(loadBugs, [filterBy])
 
-    function loadBugs() {
-        bugService.query(filterBy)
-            .then(setBugs)
-            .catch(err => showErrorMsg(`Couldn't load bugs - ${err}`))
+  function loadBugs() {
+    bugService
+      .query(filterBy)
+      .then(setBugs)
+      .catch((err) => showErrorMsg(`Couldn't load bugs - ${err}`))
+  }
+
+  function onRemoveBug(bugId) {
+    bugService
+      .remove(bugId)
+      .then(() => {
+        const bugsToUpdate = bugs.filter((bug) => bug._id !== bugId)
+        setBugs(bugsToUpdate)
+        showSuccessMsg('Bug removed')
+      })
+      .catch((err) => showErrorMsg(`Cannot remove bug`, err))
+  }
+
+  function onAddBug() {
+    const title = prompt('Bug title?', 'Bug ' + Date.now())
+    const description = prompt('Bug description?', 'A new bug')
+    const severity = +prompt('Bug severity?', 3)
+    const labelsStr = prompt('Bug labels? Separate with commas', 'general')
+
+    const bug = {
+      title,
+      description,
+      severity,
+      labels: labelsStr
+        ? labelsStr.split(',').map((label) => label.trim())
+        : [],
     }
 
-    function onRemoveBug(bugId) {
-        bugService.remove(bugId)
-            .then(() => {
-                const bugsToUpdate = bugs.filter(bug => bug._id !== bugId)
-                setBugs(bugsToUpdate)
-                showSuccessMsg('Bug removed')
-            })
-            .catch((err) => showErrorMsg(`Cannot remove bug`, err))
-    }
+    bugService
+      .save(bug)
+      .then((savedBug) => {
+        setBugs([...bugs, savedBug])
+        showSuccessMsg('Bug added')
+      })
+      .catch((err) => showErrorMsg(`Cannot add bug`, err))
+  }
 
-    function onAddBug() {
-        const bug = {
-            title: prompt('Bug title?', 'Bug ' + Date.now()),
-            description: prompt('Bug description?', 'A new bug'),
-            severity: +prompt('Bug severity?', 3)
-        }
+  function onEditBug(bug) {
+    const severity = +prompt('New severity?', bug.severity)
+    if (!severity || severity === bug.severity) return
 
-        bugService.save(bug)
-            .then(savedBug => {
-                setBugs([...bugs, savedBug])
-                showSuccessMsg('Bug added')
-            })
-            .catch(err => showErrorMsg(`Cannot add bug`, err))
-    }
+    const bugToSave = { ...bug, severity }
 
-    function onEditBug(bug) {
-        const severity = +prompt('New severity?', bug.severity)
-        if (!severity || severity === bug.severity) return
+    bugService
+      .save(bugToSave)
+      .then((savedBug) => {
+        const bugsToUpdate = bugs.map((currBug) =>
+          currBug._id === savedBug._id ? savedBug : currBug
+        )
 
-        const bugToSave = { ...bug, severity }
+        setBugs(bugsToUpdate)
+        showSuccessMsg('Bug updated')
+      })
+      .catch((err) => showErrorMsg('Cannot update bug', err))
+  }
 
-        bugService.save(bugToSave)
-            .then(savedBug => {
-                const bugsToUpdate = bugs.map(currBug =>
-                    currBug._id === savedBug._id ? savedBug : currBug)
+  function onSetFilterBy(filterBy) {
+    setFilterBy((prevFilter) => ({ ...prevFilter, ...filterBy }))
+  }
 
-                setBugs(bugsToUpdate)
-                showSuccessMsg('Bug updated')
-            })
-            .catch(err => showErrorMsg('Cannot update bug', err))
-    }
+  return (
+    <section className="bug-index main-content">
+      <header>
+        <h2>Bug List</h2>
+        <button onClick={onAddBug}>Add Bug</button>
+      </header>
 
-    function onSetFilterBy(filterBy) {
-        setFilterBy(prevFilter => ({ ...prevFilter, ...filterBy }))
-    }
+      <BugFilter filterBy={filterBy} onSetFilterBy={onSetFilterBy} />
 
-    return <section className="bug-index main-content">
-        
-        <header>
-            <h2>Bug List</h2>
-            <button onClick={onAddBug}>Add Bug</button>
-        </header>
-        
-        <BugFilter 
-            filterBy={filterBy} 
-            onSetFilterBy={onSetFilterBy} />
-
-        <BugList 
-            bugs={bugs} 
-            onRemoveBug={onRemoveBug} 
-            onEditBug={onEditBug} />
+      <BugList bugs={bugs} onRemoveBug={onRemoveBug} onEditBug={onEditBug} />
     </section>
+  )
 }

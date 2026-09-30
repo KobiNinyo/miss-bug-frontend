@@ -1,6 +1,8 @@
 .bug-filter {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    gap: 0.75em 1em;
 
     padding-block-end: 1em;
     border-block-end: 1px solid lightgray;
@@ -8,12 +10,32 @@
 }
 
 .bug-filter p {
-    margin-inline-end: auto;
+    flex-basis: 100%;
+    margin: 0;
+
     font-size: 1.1em;
     font-weight: bold;
 }
 
-:is(.bug-filter) label, input {
-    margin-inline-start: 1em;
+.bug-filter label {
+    margin: 0;
+    white-space: nowrap;
 }
 
+.bug-filter input {
+    width: 150px;
+    margin: 0;
+}
+
+.bug-filter select {
+    margin: 0;
+}
+
+.bug-filter .pagination {
+    flex-basis: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5em;
+}

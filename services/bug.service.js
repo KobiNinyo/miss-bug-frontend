@@ -7,21 +7,10 @@ export const bugService = {
   remove,
   save,
 }
-function query(filterBy) {
-  return fetch(BASE_URL)
-    .then((res) => res.json())
-    .then((bugs) => {
-      if (filterBy.txt) {
-        const regExp = new RegExp(filterBy.txt, 'i')
-        bugs = bugs.filter((bug) => regExp.test(bug.title))
-      }
+function query(filterBy = {}) {
+  const queryParams = new URLSearchParams(filterBy)
 
-      if (filterBy.minSeverity) {
-        bugs = bugs.filter((bug) => bug.severity >= filterBy.minSeverity)
-      }
-
-      return bugs
-    })
+  return fetch(`${BASE_URL}?${queryParams}`).then((res) => res.json())
 }
 
 function getById(bugId) {
@@ -39,20 +28,33 @@ function getById(bugId) {
 }
 
 function getDefaultFilter() {
-  return { txt: '', minSeverity: 0 }
+  return {
+    txt: '',
+    minSeverity: 0,
+    labels: '',
+    sortBy: '',
+    sortDir: 1,
+    pageIdx: 0,
+  }
 }
 
 function remove(bugId) {
-  return fetch(`${BASE_URL}/${bugId}/remove`, {
+  return fetch(`${BASE_URL}/${bugId}`, {
+    method: 'DELETE',
     credentials: 'include',
   }).then((res) => res.json())
 }
 
 function save(bug) {
-  const url = `${BASE_URL}/save?_id=${bug._id || ''}&title=${encodeURIComponent(
-    bug.title
-  )}&description=${encodeURIComponent(bug.description)}&severity=${
-    bug.severity
-  }`
-  return fetch(url).then((res) => res.json())
+  const method = bug._id ? 'PUT' : 'POST'
+  const url = bug._id ? `${BASE_URL}/${bug._id}` : BASE_URL
+
+  return fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(bug),
+  }).then((res) => res.json())
 }
